@@ -1,0 +1,122 @@
+---
+title: "1a_Points"
+author: "Elizabeth Delmelle"
+date: "2023-10-20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load libraries}
+
+library(tidyverse)
+library(sf)
+library(ggplot2)
+library(tidycensus)
+library(tmap)
+library(here)
+library(ggthemes)
+```
+
+Read and process the data. Load the baseball stadiums shapefile and get Census data for the US States outline
+
+```{r}
+bball <- st_read("Data/Major_League_Baseball_Stadiums.shp")
+
+us <- get_decennial(
+  geography = "state", 
+  year = 2010,
+  variables = "P001001",
+  geometry = TRUE
+)
+```
+```{r}
+bball <- bball %>% 
+  mutate(LEAGUE = ifelse(CITY == 'Houston','American', LEAGUE))%>%
+  mutate(TEAM = ifelse(TEAM == 'Cleveland Indians', 'Cleveland Guardians', TEAM))
+
+final <- filter(bball, CITY == 'Houston' | CITY == 'Philadelphia' | CITY == 'Arlington'| CITY == 'Phoeniz')
+
+
+us <- st_transform(us, crs = 'EPSG:5070')
+cont_us <- us%>% filter(NAME != 'Alaska' & NAME != 'Hawaii')
+
+final <- st_transform(final, crs = 'EPSG:5070' )
+bball <- st_transform(bball, crs = 'EPSG:5070' )
+us <- st_transform(us, crs = 'EPSG:5070' )
+
+```
+
+
+Now for the mapping
+```{r}
+
+
+league_colors <- c("National" = "red", "American" = "cyan4", "other" = "gray")
+
+p <- ggplot() +
+  geom_sf(data = cont_us, fill = "lightgrey", col = "white")+
+  geom_sf(data = bball, color = "darkgrey", size = 1.5)+
+  geom_sf(data = final, aes(color = LEAGUE), size = 2)+
+  scale_color_manual(values=league_colors)+
+  labs(title = "Major League Baseball Divisional Series", 
+       subtitle = 2023) +
+  theme_map()+
+  theme(plot.title = element_text(size = 20, face = "bold"),
+        plot.subtitle = element_text(size=15))
+
+p<- p + annotate(
+  geom = "text",
+  x = -1470000.5 ,
+  y = 1100000,
+  size = 4,
+  label = 
+    "Arizona\nDiamondbacks",
+  color = "red",
+  fontface = "bold",
+  hjust = 0 
+)
+
+
+p<- p + annotate(
+  geom = "text",
+  x = -175000.5,
+  y = 1350000,
+  size = 4,
+  label = 
+    "Texas\nRangers",
+  color = "cyan4",
+  fontface = "bold",
+  hjust = 0 
+)
+
+p<- p + annotate(
+  geom = "text",
+  x = -185000.5 ,
+  y = 530500,
+  size = 4,
+  label = 
+    "Houston\nAstros",
+  color = "cyan4",
+  fontface = "bold",
+  hjust = 0 
+)
+
+p<- p + annotate(
+  geom = "text",
+  x = 1860000,
+  y = 2079188,
+  size = 4,
+  label = 
+    "Philadelphia\nPhillies",
+  color = "red",
+  fontface = "bold",
+  hjust = 0,
+)
+
+ggsave("Outputs/Points1a.jpeg" )
+```
+
+

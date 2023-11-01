@@ -1,0 +1,14 @@
+"0","# plot baseball values"
+"0","mf_map("
+"0","  x = joined,"
+"0","  var = ""Appear"","
+"0","  type = ""prop"","
+"0","  inches = 0.25,"
+"0","  col = ""darkseagreen"","
+"0","  leg_pos = ""bottomleft2"","
+"0","  leg_title = ""World Series Appearances"""
+"0",")"
+"2","1 'NA' value is not plotted on the map.
+"
+"2","1 '0' value is not plotted on the map.
+"

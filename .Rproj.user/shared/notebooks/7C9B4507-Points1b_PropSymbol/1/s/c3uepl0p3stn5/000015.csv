@@ -1,0 +1,3 @@
+"0","bball <- st_read(""Data/Major_League_Baseball_Stadiums.shp"")"
+"2","Error: Cannot open ""Data/Major_League_Baseball_Stadiums.shp""; The file doesn't seem to exist.
+"

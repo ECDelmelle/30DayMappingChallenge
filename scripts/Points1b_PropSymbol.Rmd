@@ -1,0 +1,97 @@
+---
+title: "1b_Bubbles"
+author: "Elizabeth Delmelle"
+date: "2023-10-20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Make a graduated symbol map using sf_maps package
+
+```{r libraries}
+library(tidyverse)
+library(sf)
+library(ggplot2)
+library(tidycensus)
+library(tmap)
+library(here)
+library(ggthemes)
+library(mapsf)
+```
+
+load data - baseball shapefiles and wins.cvs. Then join
+
+```{r}
+bball <- st_read("Data/Major_League_Baseball_Stadiums.shp")
+wins <- read.csv("Data/wins.csv")
+joined <- left_join(bball, wins)
+
+bball <- bball %>% 
+   mutate(LEAGUE = ifelse(CITY == 'Houston','American', LEAGUE))%>%
+  mutate(TEAM = ifelse(TEAM == 'Cleveland Indians', 'Cleveland Guardians', TEAM))
+
+us <- get_decennial(
+  geography = "state", 
+  year = 2010,
+  variables = "P001001",
+  geometry = TRUE
+)
+cont_us <- us%>% filter(NAME != 'Alaska' & NAME != 'Hawaii' & NAME != 'Puerto Rico')
+
+yankees <- joined %>% filter(TEAM == "New York Yankees")
+
+joined <- st_transform(joined, crs = 'EPSG:5070' )
+us <- st_transform(cont_us, crs = 'EPSG:5070' )
+```
+
+
+Mapping here
+
+```{r propsymbol}
+mf_shadow(cont_us)
+mf_map(us, add = TRUE)
+# plot baseball values
+mf_map(
+  x = joined,
+  var = "Appear",
+  type = "prop",
+  inches = 0.25,
+  col = "darkseagreen",
+  leg_pos = "bottomleft2",
+  leg_title = "World Series Appearances"
+)
+mf_map(
+  x = yankees,
+  var = "Appear",
+  type = "prop",
+  inches = 0.25,
+  col = "darkseagreen",
+  leg_pos = "bottomleft2",
+  leg_title = "World Series Appearances"
+)
+# layout
+mf_layout(
+  title = "World Series Appearances by Franchise",
+  credits = paste0(
+    "Sources: Wikipedia\n",
+    "mapsf ",
+    packageVersion("mapsf")
+  )
+)
+mf_annotation(c(1829796, 2193381),
+              txt = "New York\nYankees\n40",
+              pos = "bottomright", cex = 1, font = 1.0,
+              halo= FALSE
+              )
+
+mf_annotation(c(-2018789, 1460539),
+              txt = "Los Angeles\nDodgers\n21",
+              pos = "bottomright", cex = 1, font = 1.0,
+              halo= FALSE
+              )
+```
+
+
