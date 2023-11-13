@@ -20,7 +20,6 @@ asia_shp <- asia_shp %>% rename(Country=NAME_ENGL)
 asia_select<-asia_joined%>%filter(Country == 'Japan'|Country == 'North Korea'| 
                                     Country == "South Korea"| Country == 'China')
 
-#asia_select <- st_transform(asia_select, 7564)
 data <- read.csv('asia.csv')
 
 asia_joined <- left_join(asia_shp, data)
